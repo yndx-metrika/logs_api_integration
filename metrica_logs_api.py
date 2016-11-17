@@ -49,8 +49,6 @@ def build_user_request(config):
     start_date_str, end_date_str = get_date_period(options)
     source = options.source
 
-    clickhouse.drop_table(source)
-
     # Validate that fields are present in config
     assert '{source}_fields'.format(source=source) in config, \
         'Fields must be specified in config'
