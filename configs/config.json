@@ -5,13 +5,13 @@
 	    "ym:s:counterID",
 	    "ym:s:dateTime",
 	    "ym:s:date",
-	    "ym:s:firstPartyCookie"
+	    "ym:s:clientID"
 	],
 	"hits_fields": [
 	    "ym:pv:counterID",
 	    "ym:pv:dateTime",
 	    "ym:pv:date",
-	    "ym:pv:firstPartyCookie"
+	    "ym:pv:clientID"
 	],
 	"log_level": "INFO",
 	"retries": 1,
