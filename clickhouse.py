@@ -120,7 +120,7 @@ def save_data(source, fields, data):
     if not is_table_present(source):
         create_table(source, fields)
 
-    upload(get_source_table_name(source), data)
+    upload(get_source_table_name(source), data.encode('utf-8'))
 
 
 def is_data_present(start_date_str, end_date_str, source):
