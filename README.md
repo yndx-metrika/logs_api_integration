@@ -2,6 +2,13 @@
 
 Данный скрипт реализует функциональность интеграции Logs API от Яндекс.Метрики с ClickHouse.
 
+## Требования
+Скрипт написан на Python 2.7, в нем используются библиотеки `requests` и `pandas`, которые можно установить с помощью менеджера пакетов [pip](https://pip.pypa.io/en/stable/installing/)
+```bash
+pip install requests pandas
+```
+Кроме того, для работы необходима СУБД ClickHouse, инструкцию по ее установке можно найти на [официальном сайте](https://clickhouse.yandex/).
+
 ## Настройка
 Прежде всего, необходимо заполнить [config](./configs/config.json)
 ```javascript
