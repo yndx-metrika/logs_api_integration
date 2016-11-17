@@ -2,7 +2,6 @@ import requests
 import urllib
 import json
 import utils
-import pandas as pd
 import StringIO
 import clickhouse
 import datetime
@@ -147,23 +146,24 @@ def save_data(api_request, part):
         logger.debug(r.text)
         raise ValueError(r.text)
 
-    logger.info('\n'.join(r.text.split('\n')[:5]))
+
 
     splitted_text = r.text.split('\n')
+    logger.info('\n'.join(splitted_text[:5]))
+
     headers_num = len(splitted_text[0].split('\t'))
     splitted_text_filtered = filter(lambda x: len(x.split('\t')) == headers_num, r.text.split('\n'))
     num_filtered = len(splitted_text) - len(splitted_text_filtered)
     if num_filtered != 0:
         logger.warning('%d rows were filtered out')
 
-    df = pd.read_csv(StringIO.StringIO(r.text), sep='\t')
+    output_data = '\n'.join(splitted_text_filtered)
 
     clickhouse.save_data(api_request.user_request.source,
                          api_request.user_request.fields,
-                         df)
+                         output_data)
 
     api_request.status = 'saved'
-
 
 def clean_data(api_request):
     '''Cleans generated data on server'''
