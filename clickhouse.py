@@ -28,7 +28,7 @@ def get_clickhouse_data(query, host=CH_HOST):
 def upload(table, content, host=CH_HOST):
     '''Uploads data to table in ClickHous'''
     query_dict = {
-             'query': 'INSERT INTO ' + table + ' FORMAT TabSeparated '
+             'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
         }
 
     r = requests.post(host, data=content, params=query_dict)
@@ -103,10 +103,10 @@ def create_table(source, fields):
             engine = 'Log'
 
     ch_field_types = utils.get_ch_fields_config()
-
-    for field in fields:
-        field_statements.append(field_tmpl.format(name=get_ch_field_name(field),
-            type=ch_field_types[field]))
+    ch_fields = sorted(map(get_ch_field_name, fields))
+    for i in range(len(fields)):
+        field_statements.append(field_tmpl.format(name= ch_fields[i],
+            type=ch_field_types[fields[i]]))
 
     query = tmpl.format(table_name=table_name,
                         engine=engine,
@@ -120,10 +120,7 @@ def save_data(source, fields, data):
     if not is_table_present(source):
         create_table(source, fields)
 
-    data.columns = map(get_ch_field_name, data.columns)
-    upload(get_source_table_name(source), data[sorted(data.columns)].to_csv(sep='\t',
-                                                                       index=False,
-                                                                       header=False))
+    upload(get_source_table_name(source), data)
 
 
 def is_data_present(start_date_str, end_date_str, source):
