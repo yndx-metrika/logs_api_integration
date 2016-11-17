@@ -18,7 +18,10 @@ logger = logging.getLogger('logs_api')
 def get_clickhouse_data(query, host=CH_HOST):
     '''Returns ClickHouse response'''
     logger.debug(query)
-    r = requests.post(host, data = query)
+    if (CH_USER == '') and (CH_PASSWORD == ''):
+        r = requests.post(host, data = query)
+    else:
+        r = requests.post(host, data = query, auth = (CH_USER, CH_PASSWORD))
     if r.status_code == 200:
         return r.text
     else:
