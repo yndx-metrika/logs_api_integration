@@ -6,30 +6,30 @@
 Прежде всего, необходимо заполнить config
 ```javascript
 {
-	"token" : "<your_token>", # токен для доступа к API Яндекс.Метрики
-	"counter_id": "<your_counter_id>", # номер счетчика
-	"visits_fields": [ # список параметров визитов
+	"token" : "<your_token>", // токен для доступа к API Яндекс.Метрики
+	"counter_id": "<your_counter_id>", // номер счетчика
+	"visits_fields": [ // список параметров визитов
 	    "ym:s:counterID",
 	    "ym:s:dateTime",
 	    "ym:s:date",
 	    "ym:s:firstPartyCookie"
 	],
-	"hits_fields": [ # список параметров хитов
+	"hits_fields": [ // список параметров хитов
 	    "ym:pv:counterID",
 	    "ym:pv:dateTime",
 	    "ym:pv:date",
 	    "ym:pv:firstPartyCookie"
 	],
-	"log_level": "INFO", # уровень логирования
-	"retries": 1, # количество попыток перезапустить скрипт в случае ошибки
-	"retries_delay": 60, # перерыв между попытками
+	"log_level": "INFO", // уровень логирования
+	"retries": 1, // количество попыток перезапустить скрипт в случае ошибки
+	"retries_delay": 60, // перерыв между попытками
 	"clickhouse": {
-		"host": "http://localhost:8123", # адрес поднятого инстанса ClickHouse
-		"user": "", # логин для доступа к БД
-		"password": "", # пароль для доступа в БД
-		"visits_table": "visits_all", # имя таблицы для хранения визитов
-		"hits_table": "hits_all", # имя таблицы для хранения хитов
-		"database": "default" # имя базы данных для таблиц
+		"host": "http://localhost:8123", // адрес поднятого инстанса ClickHouse
+		"user": "", // логин для доступа к БД
+		"password": "", // пароль для доступа в БД
+		"visits_table": "visits_all", // имя таблицы для хранения визитов
+		"hits_table": "hits_all", // имя таблицы для хранения хитов
+		"database": "default" // имя базы данных для таблиц
 	}
 }
 ```
