@@ -19,9 +19,9 @@ def get_clickhouse_data(query, host=CH_HOST):
     '''Returns ClickHouse response'''
     logger.debug(query)
     if (CH_USER == '') and (CH_PASSWORD == ''):
-        r = requests.post(host, data = query)
+        r = requests.post(host, data=query)
     else:
-        r = requests.post(host, data = query, auth = (CH_USER, CH_PASSWORD))
+        r = requests.post(host, data=query, auth=(CH_USER, CH_PASSWORD))
     if r.status_code == 200:
         return r.text
     else:
@@ -33,8 +33,11 @@ def upload(table, content, host=CH_HOST):
     query_dict = {
              'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
         }
-
-    r = requests.post(host, data=content, params=query_dict)
+    if (CH_USER == '') and (CH_PASSWORD == ''):
+        r = requests.post(host, data=content, params=query_dict)
+    else:
+        r = requests.post(host, data=content, params=query_dict, 
+                          auth=(CH_USER, CH_PASSWORD))
     result = r.text
     if r.status_code == 200:
         return result
