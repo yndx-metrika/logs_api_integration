@@ -1,26 +1,19 @@
 {
-	"token" : "AQAAAAAONDBAAAJ4X1liNZi1o0YEteIeMeNWSjo",
-	"counter_id": "6375151",
+	"token" : "<your_token>",
+	"counter_id": "<your_counter_id>",
 	"visits_fields": [
 	    "ym:s:counterID",
 	    "ym:s:dateTime",
 	    "ym:s:date",
-	    "ym:s:visitDuration",
-	    "ym:s:bounce",
-	    "ym:s:pageViews",
-	    "ym:s:goalsID",
-	    "ym:s:firstPartyCookie",
-	    "ym:s:lastDirectConditionType",
-	    "ym:s:purchaseRevenue",
-	    "ym:s:purchaseID",
-	    "ym:s:lastTrafficSource",
-	    "ym:s:lastAdvEngine",
-	    "ym:s:lastSearchEngineRoot",
-	    "ym:s:visitID",
-	    "ym:s:UTMMedium",
-	    "ym:s:startURL"
+	    "ym:s:firstPartyCookie"
 	],
-	"log_level": "DEBUG",
+	"hits_fields": [
+	    "ym:pv:counterID",
+	    "ym:pv:dateTime",
+	    "ym:pv:date",
+	    "ym:pv:firstPartyCookie"
+	],
+	"log_level": "INFO",
 	"retries": 1,
 	"retries_delay": 60,
 	"clickhouse": {
