@@ -97,14 +97,14 @@ def create_table(source, fields):
 
     table_name = get_source_table_name(source)
     if source == 'hits':
-        if ('ym:pv:date' in fields) and ('ym:pv:firstPartyCookie' in fields):
-            engine = 'MergeTree(Date, intHash32(FirstPartyCookie), (CounterID, Date, intHash32(FirstPartyCookie)), 8192)'
+        if ('ym:pv:date' in fields) and ('ym:pv:clientID' in fields):
+            engine = 'MergeTree(Date, intHash32(ClientID), (CounterID, Date, intHash32(ClientID)), 8192)'
         else:
             engine = 'Log'
 
     if source == 'visits':
-        if ('ym:s:date' in fields) and ('ym:s:firstPartyCookie' in fields):
-            engine = 'MergeTree(Date, intHash32(FirstPartyCookie), (CounterID, Date, intHash32(FirstPartyCookie)), 8192)'
+        if ('ym:s:date' in fields) and ('ym:s:clientID' in fields):
+            engine = 'MergeTree(Date, intHash32(ClientID), (CounterID, Date, intHash32(ClientID)), 8192)'
         else:
             engine = 'Log'
 
