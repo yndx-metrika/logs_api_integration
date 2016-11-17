@@ -11,7 +11,7 @@ import logging
 
 logger = logging.getLogger('logs_api')
 
-HOST = 'http://faced-vesel4ak-u-0.mtrs.yandex.ru:8082'
+HOST = 'https://api-metrika.yandex.ru'
 
 
 def get_estimation(user_request):
