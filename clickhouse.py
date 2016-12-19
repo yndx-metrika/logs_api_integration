@@ -109,11 +109,13 @@ def create_table(source, fields):
             engine = 'Log'
 
     ch_field_types = utils.get_ch_fields_config()
-    ch_fields = sorted(map(get_ch_field_name, fields))
+    ch_fields = map(get_ch_field_name, fields)
+    
     for i in range(len(fields)):
         field_statements.append(field_tmpl.format(name= ch_fields[i],
             type=ch_field_types[fields[i]]))
-
+    
+    field_statements = sorted(field_statements)
     query = tmpl.format(table_name=table_name,
                         engine=engine,
                         fields=',\n'.join(sorted(field_statements)))
