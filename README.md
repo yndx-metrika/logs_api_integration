@@ -13,6 +13,8 @@ pip install requests
 
 Also, you need a running ClickHouse instance to load data into it. Instruction how to install ClickHouse can be found on [official site](https://clickhouse.yandex/).
 
+Copy ./configs/config.example.json in ./configs/config.json
+
 ## Setting up
 First of all, you need to fill in [config](./configs/config.json)
 ```javascript
