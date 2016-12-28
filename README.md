@@ -1,65 +1,67 @@
-# Интеграция с Logs API
+[Russian version](README_RU.md)
 
-Данный скрипт реализует функциональность интеграции Logs API от Яндекс.Метрики с ClickHouse.
+# Integration with Logs API
+This script can help you to integrate Yandex.Metrica Logs API with ClickHouse.
 
-По вопросам работы скрипта можно обращаться в комментариях на GitHub или по e-mail: miptgirl@yandex-team.ru.
+If you have any questions, feel free to write comments, create issues on GitHub or write me (e-mail: miptgirl@yandex-team.ru).
 
-## Требования
-Скрипт написан на Python 2.7, в нем используются библиотека `requests`, которую можно установить с помощью менеджера пакетов [pip](https://pip.pypa.io/en/stable/installing/)
+## Requirements
+Script uses Python 2.7 and also requires `requests` library. You can install this library using package manager [pip](https://pip.pypa.io/en/stable/installing/)
 ```bash
 pip install requests
 ```
-Кроме того, для работы необходима СУБД ClickHouse, инструкцию по ее установке можно найти на [официальном сайте](https://clickhouse.yandex/).
 
-## Настройка
-Прежде всего, необходимо заполнить [config](./configs/config.json)
-Скопируйте ./configs/config.example.json в ./configs/config.json
+Also, you need a running ClickHouse instance to load data into it. Instruction how to install ClickHouse can be found on [official site](https://clickhouse.yandex/).
 
+## Setting up
+First of all, you need to fill in [config](./configs/config.json)
 ```javascript
 {
-	"token" : "<your_token>", // токен для доступа к API Яндекс.Метрики
-	"counter_id": "<your_counter_id>", // номер счетчика
-	"visits_fields": [ // список параметров визитов
+	"token" : "<your_token>", // token to access Yandex.Metrica API
+	"counter_id": "<your_counter_id>",
+	"visits_fields": [ // list of params for visits
 	    "ym:s:counterID",
 	    "ym:s:dateTime",
 	    "ym:s:date",
 	    "ym:s:firstPartyCookie"
 	],
-	"hits_fields": [ // список параметров хитов
+	"hits_fields": [ // list of params for hits
 	    "ym:pv:counterID",
 	    "ym:pv:dateTime",
 	    "ym:pv:date",
 	    "ym:pv:firstPartyCookie"
 	],
-	"log_level": "INFO", // уровень логирования
-	"retries": 1, // количество попыток перезапустить скрипт в случае ошибки
-	"retries_delay": 60, // перерыв между попытками
+	"log_level": "INFO", 
+	"retries": 1, 
+	"retries_delay": 60, // delay between retries
 	"clickhouse": {
-		"host": "http://localhost:8123", // адрес поднятого инстанса ClickHouse
-		"user": "", // логин для доступа к БД
-		"password": "", // пароль для доступа в БД
-		"visits_table": "visits_all", // имя таблицы для хранения визитов
-		"hits_table": "hits_all", // имя таблицы для хранения хитов
-		"database": "default" // имя базы данных для таблиц
+		"host": "http://localhost:8123", 
+		"user": "", 
+		"password": "",
+		"visits_table": "visits_all", // table name for visits
+		"hits_table": "hits_all", // table name for hits
+		"database": "default" // database name
 	}
 }
 ```
-При первом запуске скрипт создает необходимые таблицы в базе данных согласно заданным спискам полей. Поэтому при изменении списка в конфиге нужно либо полностью удалить таблицу и скачать данные заново, либо вручную добавить нужные колонки в базе данных с помощью команды [ALTER TABLE](https://clickhouse.yandex/reference_ru.html#ALTER).
 
-## Запуск программы
-При запуске программы необходимо указать источник данных (хиты или визиты) с помощью опции `-source`.
+On first execution script creates all tables in database according to config. So if you change parameters, you need to drop all tables and load data again or add new columns manually using [ALTER TABLE](https://clickhouse.yandex/reference_ru.html#ALTER).
 
-Скрипт умеет работать в нескольких режимах:
- * __history__ - скрипт выгрузит все данные с даты создания счетчика Метрики до позавчерашнего дня
- * __regular__ - в таком режиме будут выгружены данные за позавчера (рекомендуется использовать такой режим для регулярных выгрузок)
- * __regular_early__ - будут получены данные за вчерашний день
+## Running a program
+
+When running the program you need to specify a souce (hits or visits) using option `-source`.
+
+Script has several modes:
+ * __history__ - loads all the data from day one to the day before yesterday
+ * __regular__ - loads data only for day before yesterday (recommended for regular downloads)
+ * __regular_early__ - loads yesterday data (yesterday data may be not complete: some visits can lack page views)
  
-Пример запуска программы:
+Example:
 ```bash
 python metrica_logs_api.py -mode history -source visits
 ```
 
-Кроме того, есть возможность получить данные за конкретный промежуток времени:
+Also you can load data for particular time period:
 ```bash
 python metrica_logs_api.py -source hits -start_date 2016-10-10 -end_date 2016-10-18
 ```
