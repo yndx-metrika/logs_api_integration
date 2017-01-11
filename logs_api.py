@@ -87,7 +87,7 @@ def create_task(api_request):
             ('date1', api_request.date1_str),
             ('date2', api_request.date2_str),
             ('source', api_request.user_request.source),
-            ('fields', ','.join(api_request.user_request.fields)),
+            ('fields', ','.join(sorted(api_request.user_request.fields))),
             ('oauth_token', api_request.user_request.token)
         ]
     )
@@ -155,7 +155,7 @@ def save_data(api_request, part):
     splitted_text_filtered = filter(lambda x: len(x.split('\t')) == headers_num, r.text.split('\n'))
     num_filtered = len(splitted_text) - len(splitted_text_filtered)
     if num_filtered != 0:
-        logger.warning('%d rows were filtered out')
+        logger.warning('%d rows were filtered out' % num_filtered)
 
     output_data = '\n'.join(splitted_text_filtered)
 
