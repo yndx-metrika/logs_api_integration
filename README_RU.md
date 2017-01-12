@@ -13,6 +13,9 @@ pip install requests
 
 ## Настройка
 Прежде всего, необходимо заполнить [config](./configs/config.json)
+
+Скопируйте ./configs/config.example.json в ./configs/config.json
+
 ```javascript
 {
 	"token" : "<your_token>", // токен для доступа к API Яндекс.Метрики

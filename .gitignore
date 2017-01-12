@@ -1,0 +1,4 @@
+.idea/
+.directory
+*.pyc
+configs/config.json
