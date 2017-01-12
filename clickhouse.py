@@ -65,9 +65,25 @@ def get_tables():
         .strip().split('\n')
 
 
+def get_dbs():
+    """Returns list of databases"""
+    return get_clickhouse_data('SHOW DATABASES')\
+        .strip().split('\n')
+
+
 def is_table_present(source):
     """Returns whether table for data is already present in database"""
     return get_source_table_name(source, with_db=False) in get_tables()
+
+
+def is_db_present():
+    """Returns whether a database is already present in clickhouse"""
+    return CH_DATABASE in get_dbs()
+
+
+def create_db():
+    """Creates database in clickhouse"""
+    return get_clickhouse_data('CREATE DATABASE {db}'.format(db=CH_DATABASE))
 
 
 def get_ch_field_name(field_name):
@@ -123,6 +139,9 @@ def create_table(source, fields):
 
 def save_data(source, fields, data):
     """Inserts data into ClickHouse table"""
+    if not is_db_present():
+        create_db()
+
     if not is_table_present(source):
         create_table(source, fields)
 
@@ -131,6 +150,9 @@ def save_data(source, fields, data):
 
 def is_data_present(start_date_str, end_date_str, source):
     """Returns whether there is a records in database for particular date range and source"""
+    if not is_db_present():
+        return False
+
     if not is_table_present(source):
         return False
 

@@ -151,7 +151,7 @@ def save_data(api_request, part):
     splitted_text_filtered = filter(lambda x: len(x.split('\t')) == headers_num, r.text.split('\n'))
     num_filtered = len(splitted_text) - len(splitted_text_filtered)
     if num_filtered != 0:
-        logger.warning('%d rows were filtered out')
+        logger.warning('%d rows were filtered out' % num_filtered)
 
     output_data = '\n'.join(splitted_text_filtered)
 
