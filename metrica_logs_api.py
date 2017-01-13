@@ -77,34 +77,34 @@ def build_user_request(config):
 def integrate_with_logs_api(config, user_request):
     for i in range(config['retries']):
         time.sleep(i * config['retries_delay'])
-        try:
-            # Creating API requests
-            api_requests = logs_api.get_api_requests(user_request)
+        # try:
+        # Creating API requests
+        api_requests = logs_api.get_api_requests(user_request)
 
-            for api_request in api_requests:
-                logger.info('### CREATING TASK')
-                logs_api.create_task(api_request)
-                print api_request
+        for api_request in api_requests:
+            logger.info('### CREATING TASK')
+            logs_api.create_task(api_request)
+            print api_request
 
-                delay = 20
-                while api_request.status != 'processed':
-                    logger.info('### DELAY %d secs' % delay)
-                    time.sleep(delay)
-                    logger.info('### CHECKING STATUS')
-                    api_request = logs_api.update_status(api_request)
-                    logger.info('API Request status: ' + api_request.status)
+            delay = 20
+            while api_request.status != 'processed':
+                logger.info('### DELAY %d secs' % delay)
+                time.sleep(delay)
+                logger.info('### CHECKING STATUS')
+                api_request = logs_api.update_status(api_request)
+                logger.info('API Request status: ' + api_request.status)
 
-                logger.info('### SAVING DATA')
-                for part in range(api_request.size):
-                    logger.info('Part #' + str(part))
-                    logs_api.save_data(api_request, part)
+            logger.info('### SAVING DATA')
+            for part in range(api_request.size):
+                logger.info('Part #' + str(part))
+                logs_api.save_data(api_request, part)
 
-                logger.info('### CLEANING DATA')
-                logs_api.clean_data(api_request)
-        except Exception as e:
-            logger.critical('Iteration #{i} failed'.format(i=i + 1))
-            if i == config['retries'] - 1:
-                raise e
+            logger.info('### CLEANING DATA')
+            logs_api.clean_data(api_request)
+        # except Exception as e:
+        #     logger.critical('Iteration #{i} failed'.format(i=i + 1))
+        #     if i == config['retries'] - 1:
+        #         raise e
 
 if __name__ == '__main__':
 

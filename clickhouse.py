@@ -111,13 +111,13 @@ def create_table(source, fields):
     table_name = get_source_table_name(source)
     if source == 'hits':
         if ('ym:pv:date' in fields) and ('ym:pv:clientID' in fields):
-            engine = 'MergeTree(Date, intHash32(ClientID), (CounterID, Date, intHash32(ClientID)), 8192)'
+            engine = 'MergeTree(Date, intHash32(ClientID), (Date, intHash32(ClientID)), 8192)'
         else:
             engine = 'Log'
 
     if source == 'visits':
         if ('ym:s:date' in fields) and ('ym:s:clientID' in fields):
-            engine = 'MergeTree(Date, intHash32(ClientID), (CounterID, Date, intHash32(ClientID)), 8192)'
+            engine = 'MergeTree(Date, intHash32(ClientID), (Date, intHash32(ClientID)), 8192)'
         else:
             engine = 'Log'
 
@@ -145,7 +145,7 @@ def save_data(source, fields, data):
     if not is_table_present(source):
         create_table(source, fields)
 
-    upload(get_source_table_name(source), data.encode('utf-8'))
+    upload(get_source_table_name(source), data)
 
 
 def is_data_present(start_date_str, end_date_str, source):

@@ -87,7 +87,7 @@ def create_task(api_request):
             ('date1', api_request.date1_str),
             ('date2', api_request.date2_str),
             ('source', api_request.user_request.source),
-            ('fields', ','.join(sorted(api_request.user_request.fields))),
+            ('fields', ','.join(sorted(api_request.user_request.fields, key=lambda s: s.lower()))),
             ('oauth_token', api_request.user_request.token)
         ]
     )
@@ -149,6 +149,7 @@ def save_data(api_request, part):
 
 
     splitted_text = r.text.split('\n')
+    logger.info('### DATA SAMPLE')
     logger.info('\n'.join(splitted_text[:5]))
 
     headers_num = len(splitted_text[0].split('\t'))
@@ -157,7 +158,8 @@ def save_data(api_request, part):
     if num_filtered != 0:
         logger.warning('%d rows were filtered out' % num_filtered)
 
-    output_data = '\n'.join(splitted_text_filtered)
+    output_data = '\n'.join(splitted_text_filtered).encode('utf-8')
+    output_data = output_data.replace(r"\'", "'") # to correct escapes in params
 
     clickhouse.save_data(api_request.user_request.source,
                          api_request.user_request.fields,
