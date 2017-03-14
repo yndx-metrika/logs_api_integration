@@ -3,15 +3,27 @@
 	"counter_id": "<your_counter_id>",
 	"visits_fields": [
 	    "ym:s:counterID",
-	    "ym:s:dateTime",
-	    "ym:s:date",
-	    "ym:s:clientID"
-	],
-	"hits_fields": [
-	    "ym:pv:counterID",
-	    "ym:pv:dateTime",
-	    "ym:pv:date",
-	    "ym:pv:clientID"
+		"ym:s:startURL",
+		"ym:s:dateTime",
+		"ym:s:date",
+		"ym:s:visitID",
+		"ym:s:visitDuration",
+		"ym:s:pageViews",
+		"ym:s:bounce",
+		"ym:s:ipAddress",
+		"ym:s:params",
+		"ym:s:referer",
+		"ym:s:regionCountry",
+		"ym:s:regionCity",
+		"ym:s:deviceCategory",
+		"ym:s:operatingSystemRoot",
+		"ym:s:operatingSystem",
+		"ym:s:browser",
+		"ym:s:goalsID",
+		"ym:s:clientID",
+		"ym:s:lastTrafficSource",
+		"ym:s:lastAdvEngine",
+		"ym:s:lastSearchEngineRoot"
 	],
 	"log_level": "INFO",
 	"retries": 1,
@@ -23,5 +35,13 @@
 		"visits_table": "visits_all",
 		"hits_table": "hits_all",
 		"database": "default"
+	},
+	"vertica": {
+		"host": "http://localhost:5433",
+		"user": "",
+		"password": "",
+		"visits_table": "tmp_vlu_vyametrica",
+		"hits_table": "tmp_vlu_hyametrica",
+		"database": "DWH"
 	}
 }
