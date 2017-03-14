@@ -2,6 +2,7 @@ from collections import namedtuple
 import logs_api
 import time
 import clickhouse
+import vertica
 import utils
 import sys
 import datetime
@@ -18,6 +19,7 @@ def setup_logging(config):
 
 
 def get_date_period(options):
+    """Get date limits tuple from options"""
     if options.mode is None:
         start_date_str = options.start_date
         end_date_str = options.end_date
@@ -42,8 +44,8 @@ def get_date_period(options):
     return start_date_str, end_date_str
 
 
-def build_user_request(config):
-    options = utils.get_cli_options()
+def build_user_request(config, options):
+    """Create user request as a named tuple"""
     logger.info('CLI Options: ' + str(options))
 
     start_date_str, end_date_str = get_date_period(options)
@@ -70,11 +72,12 @@ def build_user_request(config):
     )
 
     logger.info(user_request)
-    utils.validate_user_request(user_request)
+    utils.validate_user_request(user_request)  # unnecessary check
     return user_request
 
 
-def integrate_with_logs_api(config, user_request):
+def integrate_with_logs_api(config, user_request, destination):
+    """Attempt fetching data from Logs API and saving to destination (clickhouse, vertica)"""
     for i in range(config['retries']):
         time.sleep(i * config['retries_delay'])
         try:
@@ -97,7 +100,7 @@ def integrate_with_logs_api(config, user_request):
                 logger.info('### SAVING DATA')
                 for part in range(api_request.size):
                     logger.info('Part #' + str(part))
-                    logs_api.save_data(api_request, part)
+                    logs_api.save_data(api_request, part, destination)
 
                 logger.info('### CLEANING DATA')
                 logs_api.clean_data(api_request)
@@ -113,17 +116,22 @@ if __name__ == '__main__':
 
     config = utils.get_config()
     setup_logging(config)
+    options = utils.get_cli_options()
 
-    user_request = build_user_request(config)
+    user_request = build_user_request(config, options)
+    if (options.dest is None) or (options.dest == 'clickhouse'):
+        destination = clickhouse
+    elif options.dest == 'vertica':
+        destination = vertica
 
     # If data for specified period is already in database, script is skipped
-    if clickhouse.is_data_present(user_request.start_date_str,
+    if destination.is_data_present(user_request.start_date_str,
                                   user_request.end_date_str,
                                   user_request.source):
         logging.critical('Data for selected dates is already in database')
         exit(0)
 
-    integrate_with_logs_api(config, user_request)
+    integrate_with_logs_api(config, user_request, destination)
 
     end_time = time.time()
     logger.info('### TOTAL TIME: %d minutes %d seconds' % (

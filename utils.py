@@ -23,12 +23,10 @@ def validate_user_request(user_request):
 
 def validate_cli_options(options):
     """Validates command line options"""
-    assert options.source is not None, \
-        'Source must be specified in CLI options'
+    assert options.source is not None, 'Source must be specified in CLI options'
     if options.mode is None:
         assert (options.start_date is not None) \
-               and (options.end_date is not None), \
-            'Dates or mode must be specified'
+               and (options.end_date is not None), 'Dates or mode must be specified'
     else:
         assert options.mode in ['history', 'regular', 'regular_early'], \
             'Wrong mode in CLI options'
@@ -41,6 +39,7 @@ def get_cli_options():
     parser.add_argument('-end_date', help='End of period')
     parser.add_argument('-mode', help='Mode (one of [history, reqular, regular_early])')
     parser.add_argument('-source', help='Source (hits or visits)')
+    parser.add_argument('-dest', help='Destination (clickstream or vertica)')
     options = parser.parse_args()
     validate_cli_options(options)
     return options
@@ -67,6 +66,7 @@ def get_config():
     assert 'token' in config, 'Token must be specified in config'
     assert 'retries' in config, 'Number of retries should be specified in config'
     assert 'retries_delay' in config, 'Delay between retries should be specified in config'
+    assert ('clickhouse' in config) or ('vertica' in config), 'Destination should be specified in config'
     return config
 
 

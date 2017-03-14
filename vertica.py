@@ -1,22 +1,23 @@
 import requests
-import urllib  # ?
+import urllib
 import utils
-import sys     # ?
+import sys
 import logging
+import pyodbc
 
 config = utils.get_config()
-CH_HOST = config['clickhouse']['host']
-CH_USER = config['clickhouse']['user']
-CH_PASSWORD = config['clickhouse']['password']
-CH_VISITS_TABLE = config['clickhouse']['visits_table']
-CH_HITS_TABLE = config['clickhouse']['hits_table']
-CH_DATABASE = config['clickhouse']['database']
+CH_HOST = config['vertica']['host']
+CH_USER = config['vertica']['user']
+CH_PASSWORD = config['vertica']['password']
+CH_VISITS_TABLE = config['vertica']['visits_table']
+CH_HITS_TABLE = config['vertica']['hits_table']
+CH_DATABASE = config['vertica']['database']
 
 logger = logging.getLogger('logs_api')
 
 
 def get_data(query, host=CH_HOST):
-    """Returns ClickHouse response"""
+    """Returns Vertica response"""
     logger.debug(query)
     if (CH_USER == '') and (CH_PASSWORD == ''):
         r = requests.post(host, data=query)
@@ -29,7 +30,7 @@ def get_data(query, host=CH_HOST):
 
 
 def upload(table, content, host=CH_HOST):
-    """Uploads data to table in ClickHous"""
+    """Uploads data to table in Vertica"""
     query_dict = {
         'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
     }
@@ -77,17 +78,17 @@ def is_table_present(source):
 
 
 def is_db_present():
-    """Returns whether a database is already present in clickhouse"""
+    """Returns whether a database is already present in Vertica"""
     return CH_DATABASE in get_dbs()
 
 
 def create_db():
-    """Creates database in clickhouse"""
+    """Creates database in Vertica"""
     return get_data('CREATE DATABASE {db}'.format(db=CH_DATABASE))
 
 
 def get_ch_field_name(field_name):
-    """Converts Logs API parameter name to ClickHouse column name"""
+    """Converts Logs API parameter name to Vertica column name"""
     prefixes = ['ym:s:', 'ym:pv:']
     for prefix in prefixes:
         field_name = field_name.replace(prefix, '')
@@ -95,14 +96,14 @@ def get_ch_field_name(field_name):
 
 
 def drop_table(source):
-    """Drops table in ClickHouse"""
+    """Drops table in Vertica"""
     query = 'DROP TABLE IF EXISTS {table}'.format(
         table=get_source_table_name(source))
     get_data(query)
 
 
 def create_table(source, fields):
-    """Creates table in ClickHouse for hits/visits with particular fields"""
+    """Creates table in Vertica for hits/visits with particular fields"""
     tmpl = '''
         CREATE TABLE {table_name} (
             {fields}
@@ -140,7 +141,7 @@ def create_table(source, fields):
 
 
 def save_data(source, fields, data):
-    """Inserts data into ClickHouse table"""
+    """Inserts data into Vertica table"""
 
     if not is_db_present():
         create_db()

@@ -2,8 +2,8 @@ import requests
 import urllib
 import json
 import utils
-import StringIO
-import clickhouse
+import StringIO    # ?
+import clickhouse  # ?
 import datetime
 import logging
 
@@ -129,7 +129,7 @@ def update_status(api_request):
         raise ValueError(r.text)
 
 
-def save_data(api_request, part):
+def save_data(api_request, part, destination):
     """Loads data chunk from Logs API and saves to ClickHouse"""
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download?oauth_token={token}' \
         .format(
@@ -158,7 +158,7 @@ def save_data(api_request, part):
     output_data = '\n'.join(splitted_text_filtered).encode('utf-8')
     output_data = output_data.replace(r"\'", "'")  # to correct escapes in params
 
-    clickhouse.save_data(api_request.user_request.source,
+    destination.save_data(api_request.user_request.source,
                          api_request.user_request.fields,
                          output_data)
 
