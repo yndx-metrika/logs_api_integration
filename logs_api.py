@@ -7,14 +7,13 @@ import clickhouse
 import datetime
 import logging
 
-
 logger = logging.getLogger('logs_api')
 
 HOST = 'https://api-metrika.yandex.ru'
 
 
 def get_estimation(user_request):
-    '''Returns estimation of Logs API (whether it's possible to load data and max period in days)'''
+    """Returns estimation of Logs API (whether it's possible to load data and max period in days)"""
     url_params = urllib.urlencode(
         [
             ('date1', user_request.start_date_str),
@@ -25,8 +24,8 @@ def get_estimation(user_request):
         ]
     )
 
-    url = '{host}/management/v1/counter/{counter_id}/logrequests/evaluate?'\
-        .format(host=HOST, counter_id=user_request.counter_id) + url_params
+    url = '{host}/management/v1/counter/{counter_id}/logrequests/evaluate?' \
+              .format(host=HOST, counter_id=user_request.counter_id) + url_params
 
     r = requests.get(url)
     logger.debug(r.text)
@@ -37,7 +36,7 @@ def get_estimation(user_request):
 
 
 def get_api_requests(user_request):
-    '''Returns list of API requests for UserRequest'''
+    """Returns list of API requests for UserRequest"""
     api_requests = []
     estimation = get_estimation(user_request)
     if estimation['possible']:
@@ -60,13 +59,13 @@ def get_api_requests(user_request):
         )
 
         days = (end_date - start_date).days
-        num_requests = int(days/estimation['max_possible_day_quantity']) + 1
-        days_in_period = int(days/num_requests) + 1
+        num_requests = int(days / estimation['max_possible_day_quantity']) + 1
+        days_in_period = int(days / num_requests) + 1
         for i in range(num_requests):
-            date1 = start_date + datetime.timedelta(i*days_in_period)
+            date1 = start_date + datetime.timedelta(i * days_in_period)
             date2 = min(
                 end_date,
-                start_date + datetime.timedelta((i+1)*days_in_period - 1)
+                start_date + datetime.timedelta((i + 1) * days_in_period - 1)
             )
 
             api_request = utils.Structure(
@@ -81,7 +80,7 @@ def get_api_requests(user_request):
 
 
 def create_task(api_request):
-    '''Creates a Logs API task to generate data'''
+    """Creates a Logs API task to generate data"""
     url_params = urllib.urlencode(
         [
             ('date1', api_request.date1_str),
@@ -91,9 +90,9 @@ def create_task(api_request):
             ('oauth_token', api_request.user_request.token)
         ]
     )
-    url = '{host}/management/v1/counter/{counter_id}/logrequests?'\
-        .format(host=HOST,
-                counter_id=api_request.user_request.counter_id) \
+    url = '{host}/management/v1/counter/{counter_id}/logrequests?' \
+              .format(host=HOST,
+                      counter_id=api_request.user_request.counter_id) \
           + url_params
 
     r = requests.post(url)
@@ -110,7 +109,7 @@ def create_task(api_request):
 
 
 def update_status(api_request):
-    '''Returns current tasks\'s status'''
+    """Returns current tasks\'s status"""
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}?oauth_token={token}' \
         .format(request_id=api_request.request_id,
                 counter_id=api_request.user_request.counter_id,
@@ -131,22 +130,20 @@ def update_status(api_request):
 
 
 def save_data(api_request, part):
-    '''Loads data chunk from Logs API and saves to ClickHouse'''
+    """Loads data chunk from Logs API and saves to ClickHouse"""
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download?oauth_token={token}' \
         .format(
-            host=HOST,
-            counter_id=api_request.user_request.counter_id,
-            request_id=api_request.request_id,
-            part=part,
-            token=api_request.user_request.token
-        )
+        host=HOST,
+        counter_id=api_request.user_request.counter_id,
+        request_id=api_request.request_id,
+        part=part,
+        token=api_request.user_request.token
+    )
 
     r = requests.get(url)
     if r.status_code != 200:
         logger.debug(r.text)
         raise ValueError(r.text)
-
-
 
     splitted_text = r.text.split('\n')
     logger.info('### DATA SAMPLE')
@@ -159,7 +156,7 @@ def save_data(api_request, part):
         logger.warning('%d rows were filtered out' % num_filtered)
 
     output_data = '\n'.join(splitted_text_filtered).encode('utf-8')
-    output_data = output_data.replace(r"\'", "'") # to correct escapes in params
+    output_data = output_data.replace(r"\'", "'")  # to correct escapes in params
 
     clickhouse.save_data(api_request.user_request.source,
                          api_request.user_request.fields,
@@ -167,8 +164,9 @@ def save_data(api_request, part):
 
     api_request.status = 'saved'
 
+
 def clean_data(api_request):
-    '''Cleans generated data on server'''
+    """Cleans generated data on server"""
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/clean?oauth_token={token}' \
         .format(host=HOST,
                 counter_id=api_request.user_request.counter_id,
