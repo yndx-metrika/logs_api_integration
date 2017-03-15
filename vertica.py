@@ -152,7 +152,6 @@ def save_data(source, fields, data):
         con.close()
     except Exception as e:
         logger.warning(get_message('close_warning'))
-        raise e
 
 
 def is_data_present(start_date_str, end_date_str, source):
@@ -167,15 +166,14 @@ def is_data_present(start_date_str, end_date_str, source):
         SELECT count(*) cnt
         FROM {table}
         WHERE date between '{start_date}' AND '{end_date}';
-    '''.format(table=table_name,
-               start_date=start_date_str,
-               end_date=end_date_str)
+    '''.format(table=table_name, start_date=start_date_str, end_date=end_date_str)
+
+    rows = get_data(cursor, query)
 
     try:
         con.close()
     except Exception as e:
         logger.warning(get_message('close_warning'))
-        raise e
 
-    visits = get_data(cursor, query)
-    return visits != ''
+    return rows[0][0] > 0
+

@@ -161,3 +161,6 @@ def clean_data(api_request):
 
     api_request.status = json.loads(r.text)['log_request']['status']
     return json.loads(r.text)['log_request']
+
+
+
