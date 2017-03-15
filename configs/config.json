@@ -4,8 +4,8 @@
 	"visits_fields": [
 	    "ym:s:counterID",
 		"ym:s:startURL",
-		"ym:s:dateTime",
 		"ym:s:date",
+		"ym:s:dateTime",
 		"ym:s:visitID",
 		"ym:s:visitDuration",
 		"ym:s:pageViews",
@@ -40,8 +40,8 @@
 		"host": "http://localhost:5433",
 		"user": "",
 		"password": "",
-		"visits_table": "tmp_vlu_vyametrica",
-		"hits_table": "tmp_vlu_hyametrica",
+		"visits_table": "PUBLIC.tmp_vlu_vyametrica",
+		"hits_table": "PUBLIC.tmp_vlu_hyametrica",
 		"database": "DWH"
 	}
 }

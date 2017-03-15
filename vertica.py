@@ -1,173 +1,172 @@
-import requests
-import urllib
 import utils
-import sys
 import logging
 import pyodbc
 
 config = utils.get_config()
-CH_HOST = config['vertica']['host']
-CH_USER = config['vertica']['user']
-CH_PASSWORD = config['vertica']['password']
-CH_VISITS_TABLE = config['vertica']['visits_table']
-CH_HITS_TABLE = config['vertica']['hits_table']
-CH_DATABASE = config['vertica']['database']
+VT_HOST = config['vertica']['host']
+VT_USER = config['vertica']['user']
+VT_PASSWORD = config['vertica']['password']
+VT_VISITS_TABLE = config['vertica']['visits_table']
+VT_HITS_TABLE = config['vertica']['hits_table']
+VT_DATABASE = config['vertica']['database']
 
 logger = logging.getLogger('logs_api')
 
 
-def get_data(query, host=CH_HOST):
+def get_message(name):
+    """Returns errors and warning string"""
+    if name == 'connect_error':
+        return 'Unable to connect to Vertica:\n\tHOST={server},\n\tDATABASE={db},\n\tUSER={user}' \
+            .format(server=VT_HOST, db=VT_DATABASE, user=VT_USER)
+    elif name == 'close_warning':
+        return 'Unable to close the connection to Vertica:\n\tHOST={server},\n\tDATABASE={db},\n\tUSER={user}' \
+            .format(server=VT_HOST, db=VT_DATABASE, user=VT_USER)
+    else:
+        raise ValueError('Wrong argument: ' + name)
+
+
+def get_cursor():
+    connection_string = 'Driver=Vertica;Servername={server};Port=5433;Database={db};UserName={user};Password={psw}' \
+        .format(server=VT_HOST, db=VT_DATABASE, user=VT_USER, psw=VT_PASSWORD)
+    try:
+        con = pyodbc.connect(connection_string)
+        cursor = con.cursor()
+    except Exception as e:
+        logger.critical(get_message('connect_error'))
+        raise e
+    return cursor, con
+
+
+def get_data(cursor, query):
     """Returns Vertica response"""
     logger.debug(query)
-    if (CH_USER == '') and (CH_PASSWORD == ''):
-        r = requests.post(host, data=query)
-    else:
-        r = requests.post(host, data=query, auth=(CH_USER, CH_PASSWORD))
-    if r.status_code == 200:
-        return r.text
-    else:
-        raise ValueError(r.text)
+    try:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+    except Exception as e:
+        logger.critical(get_message('connect_error'))
+        raise e
+    return rows
 
 
-def upload(table, content, host=CH_HOST):
+def upload(cursor, table, content):
     """Uploads data to table in Vertica"""
-    query_dict = {
-        'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
-    }
-    if (CH_USER == '') and (CH_PASSWORD == ''):
-        r = requests.post(host, data=content, params=query_dict)
-    else:
-        r = requests.post(host, data=content, params=query_dict,
-                          auth=(CH_USER, CH_PASSWORD))
-    result = r.text
-    if r.status_code == 200:
-        return result
-    else:
-        raise ValueError(r.text)
+    pass
 
 
-def get_source_table_name(source, with_db=True):
+def get_source_table_name(source):
     """Returns table name in database"""
     if source == 'hits':
-        if with_db:
-            return '{db}.{table}'.format(db=CH_DATABASE, table=CH_HITS_TABLE)
-        else:
-            return CH_HITS_TABLE
+        return VT_HITS_TABLE
     if source == 'visits':
-        if with_db:
-            return '{db}.{table}'.format(db=CH_DATABASE, table=CH_VISITS_TABLE)
-        else:
-            return CH_VISITS_TABLE
+        return VT_VISITS_TABLE
 
 
-def get_tables():
-    """Returns list of tables in database"""
-    return get_data('SHOW TABLES FROM {db}'.format(db=CH_DATABASE)) \
-        .strip().split('\n')
+def get_tables(cursor):
+    """Returns list of tables in a database"""
+    rows = get_data(cursor, """SELECT table_schema, table_name from TABLES""")
+    result = []
+    for r in rows:
+        result.append('.'.join(r).lower())
+    return result
 
 
-def get_dbs():
-    """'Returns list of databases"""
-    return get_data('SHOW DATABASES') \
-        .strip().split('\n')
-
-
-def is_table_present(source):
+def is_table_present(cursor, source):
     """Returns whether table for data is already present in database"""
-    return get_source_table_name(source, with_db=False) in get_tables()
+    return get_source_table_name(source) in get_tables(cursor)
 
 
-def is_db_present():
-    """Returns whether a database is already present in Vertica"""
-    return CH_DATABASE in get_dbs()
-
-
-def create_db():
-    """Creates database in Vertica"""
-    return get_data('CREATE DATABASE {db}'.format(db=CH_DATABASE))
-
-
-def get_ch_field_name(field_name):
+def get_vt_field_name(field_name):
     """Converts Logs API parameter name to Vertica column name"""
     prefixes = ['ym:s:', 'ym:pv:']
     for prefix in prefixes:
         field_name = field_name.replace(prefix, '')
-    return field_name[0].upper() + field_name[1:]
+    return utils.camel_to_snake(field_name)
 
 
-def drop_table(source):
+def drop_table(cursor, source):
     """Drops table in Vertica"""
-    query = 'DROP TABLE IF EXISTS {table}'.format(
-        table=get_source_table_name(source))
-    get_data(query)
+    table_name = get_source_table_name(source)
+    query = 'DROP TABLE IF EXISTS {table};'.format(table=table_name)
+    try:
+        cursor.execute(query)
+    except Exception as e:
+        logger.critical('Unable to DROP table ' + table_name)
+        raise e
 
 
-def create_table(source, fields):
+def create_table(cursor, source, fields):
     """Creates table in Vertica for hits/visits with particular fields"""
     tmpl = '''
-        CREATE TABLE {table_name} (
+        CREATE TABLE {table_name} AS (
             {fields}
-        ) ENGINE = {engine}
+        ) ORDER BY {order_clause}
+          SEGMENTED BY HASH({segmentation_clause}) ALL NODES;
     '''
     field_tmpl = '{name} {type}'
     field_statements = []
 
     table_name = get_source_table_name(source)
-    if source == 'hits':
-        if ('ym:pv:date' in fields) and ('ym:pv:clientID' in fields):
-            engine = 'MergeTree(Date, intHash32(ClientID), (Date, intHash32(ClientID)), 8192)'
-        else:
-            engine = 'Log'
 
-    if source == 'visits':
-        if ('ym:s:date' in fields) and ('ym:s:clientID' in fields):
-            engine = 'MergeTree(Date, intHash32(ClientID), (Date, intHash32(ClientID)), 8192)'
-        else:
-            engine = 'Log'
+    vt_field_types = utils.get_fields_config('vertica')
+    vt_fields = map(get_vt_field_name, fields)
 
-    ch_field_types = utils.get_ch_fields_config()
-    ch_fields = map(get_ch_field_name, fields)
+    order_clause = ', '.join(vt_fields[:5])
+    segmentation_clause = ', '.join(vt_fields[:3])
 
     for i in range(len(fields)):
-        field_statements.append(field_tmpl.format(name=ch_fields[i],
-                                                  type=ch_field_types[fields[i]]))
+        field_statements.append(field_tmpl.format(name=vt_fields[i],
+                                                  type=vt_field_types[fields[i]]))
 
-    field_statements = sorted(field_statements)
     query = tmpl.format(table_name=table_name,
-                        engine=engine,
-                        fields=',\n'.join(sorted(field_statements)))
+                        order_clause=order_clause,
+                        segmentation_clause=segmentation_clause,
+                        fields=',\n'.join(field_statements))
 
-    get_data(query)
+    try:
+        cursor.execute(query)
+    except Exception as e:
+        logger.critical('Unable to CREATE table ' + table_name)
+        raise e
 
 
 def save_data(source, fields, data):
     """Inserts data into Vertica table"""
+    cursor, con = get_cursor()
 
-    if not is_db_present():
-        create_db()
+    if not is_table_present(cursor, source):
+        create_table(cursor, source, fields)
 
-    if not is_table_present(source):
-        create_table(source, fields)
+    upload(cursor, get_source_table_name(source), data)
 
-    upload(get_source_table_name(source), data)
+    try:
+        con.close()
+    except Exception as e:
+        logger.warning(get_message('close_warning'))
+        raise e
 
 
 def is_data_present(start_date_str, end_date_str, source):
     """Returns whether there is a records in database for particular date range and source"""
-    if not is_db_present():
-        return False
+    cursor, con = get_cursor()
 
-    if not is_table_present(source):
+    if not is_table_present(cursor, source):
         return False
 
     table_name = get_source_table_name(source)
     query = '''
-        SELECT count()
+        SELECT count(*) cnt
         FROM {table}
-        WHERE Date >= '{start_date}' AND Date <= '{end_date}'
+        WHERE date between '{start_date}' AND '{end_date}';
     '''.format(table=table_name,
                start_date=start_date_str,
                end_date=end_date_str)
 
-    visits = get_data(query, CH_HOST)
+    try:
+        con.close()
+    except Exception as e:
+        logger.warning(get_message('close_warning'))
+        raise e
+
+    visits = get_data(cursor, query)
     return visits != ''

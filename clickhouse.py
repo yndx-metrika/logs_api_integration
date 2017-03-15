@@ -29,7 +29,7 @@ def get_data(query, host=CH_HOST):
 
 
 def upload(table, content, host=CH_HOST):
-    """Uploads data to table in ClickHous"""
+    """Uploads data to table in ClickHouse"""
     query_dict = {
         'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
     }
@@ -124,7 +124,7 @@ def create_table(source, fields):
         else:
             engine = 'Log'
 
-    ch_field_types = utils.get_ch_fields_config()
+    ch_field_types = utils.get_fields_config()
     ch_fields = map(get_ch_field_name, fields)
 
     for i in range(len(fields)):

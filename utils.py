@@ -1,6 +1,7 @@
 import json
 import argparse
 import requests
+import re
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -39,7 +40,7 @@ def get_cli_options():
     parser.add_argument('-end_date', help='End of period')
     parser.add_argument('-mode', help='Mode (one of [history, reqular, regular_early])')
     parser.add_argument('-source', help='Source (hits or visits)')
-    parser.add_argument('-dest', help='Destination (clickstream or vertica)')
+    parser.add_argument('-dest', help='Destination (clickhouse or vertica)')
     options = parser.parse_args()
     validate_cli_options(options)
     return options
@@ -70,8 +71,20 @@ def get_config():
     return config
 
 
-def get_ch_fields_config():
+def camel_to_snake(name):
+    """Converts camal-case string to snake-case (underscore-separated)"""
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def get_fields_config(dbtype='clickhouse'):
     """Returns config for ClickHouse columns\'s datatypes"""
-    with open('./configs/ch_types.json') as input_file:
+    if (dbtype is None) or (dbtype == 'clickhouse'):
+        prefix = 'ch'
+    elif dbtype == 'vertica':
+        prefix = 'vt'
+    else:
+        raise ValueError('Wrong argument: ' + str(dbtype))
+    with open('./configs/{prefix}_types.json'.format(prefix=prefix)) as input_file:
         ch_field_types = json.loads(input_file.read())
     return ch_field_types

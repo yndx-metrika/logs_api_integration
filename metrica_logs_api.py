@@ -104,6 +104,7 @@ def integrate_with_logs_api(config, user_request, destination):
 
                 logger.info('### CLEANING DATA')
                 logs_api.clean_data(api_request)
+                # !!! ADD analyze_statistics
         except Exception as e:
             logger.critical('Iteration #{i} failed'.format(i=i + 1))
             if i == config['retries'] - 1:
