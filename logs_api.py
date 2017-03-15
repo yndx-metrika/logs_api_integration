@@ -1,11 +1,8 @@
-import requests
-import urllib
-import json
-import utils
-import StringIO    # ?
-import clickhouse  # ?
 import datetime
 import logging
+import requests
+import json
+import utils
 
 logger = logging.getLogger('logs_api')
 
@@ -14,20 +11,14 @@ HOST = 'https://api-metrika.yandex.ru'
 
 def get_estimation(user_request):
     """Returns estimation of Logs API (whether it's possible to load data and max period in days)"""
-    url_params = urllib.urlencode(
-        [
-            ('date1', user_request.start_date_str),
-            ('date2', user_request.end_date_str),
-            ('source', user_request.source),
-            ('fields', ','.join(user_request.fields)),
-            ('oauth_token', user_request.token)
-        ]
-    )
-
     url = '{host}/management/v1/counter/{counter_id}/logrequests/evaluate?' \
-              .format(host=HOST, counter_id=user_request.counter_id) + url_params
+        .format(host=HOST, counter_id=user_request.counter_id)
 
-    r = requests.get(url)
+    r = requests.get(url, {'date1': user_request.start_date_str,
+                           'date2': user_request.end_date_str,
+                           'source': user_request.source,
+                           'fields': ','.join(user_request.fields),
+                           'oauth_token': user_request.token})
     logger.debug(r.text)
     if r.status_code == 200:
         return json.loads(r.text)['log_request_evaluation']
@@ -81,21 +72,14 @@ def get_api_requests(user_request):
 
 def create_task(api_request):
     """Creates a Logs API task to generate data"""
-    url_params = urllib.urlencode(
-        [
-            ('date1', api_request.date1_str),
-            ('date2', api_request.date2_str),
-            ('source', api_request.user_request.source),
-            ('fields', ','.join(sorted(api_request.user_request.fields, key=lambda s: s.lower()))),
-            ('oauth_token', api_request.user_request.token)
-        ]
-    )
     url = '{host}/management/v1/counter/{counter_id}/logrequests?' \
-              .format(host=HOST,
-                      counter_id=api_request.user_request.counter_id) \
-          + url_params
+        .format(host=HOST, counter_id=api_request.user_request.counter_id)
 
-    r = requests.post(url)
+    r = requests.post(url, {'date1': api_request.date1_str,
+                            'date2': api_request.date2_str,
+                            'source': api_request.user_request.source,
+                            'fields': ','.join(sorted(api_request.user_request.fields, key=lambda s: s.lower())),
+                            'oauth_token': api_request.user_request.token})
     logger.debug(r.text)
     if r.status_code == 200:
         logger.debug(json.dumps(json.loads(r.text)['log_request'], indent=2))
@@ -132,13 +116,11 @@ def update_status(api_request):
 def save_data(api_request, part, destination):
     """Loads data chunk from Logs API and saves to ClickHouse"""
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download?oauth_token={token}' \
-        .format(
-        host=HOST,
-        counter_id=api_request.user_request.counter_id,
-        request_id=api_request.request_id,
-        part=part,
-        token=api_request.user_request.token
-    )
+        .format(host=HOST,
+                counter_id=api_request.user_request.counter_id,
+                request_id=api_request.request_id,
+                part=part,
+                token=api_request.user_request.token)
 
     r = requests.get(url)
     if r.status_code != 200:
@@ -159,8 +141,8 @@ def save_data(api_request, part, destination):
     output_data = output_data.replace(r"\'", "'")  # to correct escapes in params
 
     destination.save_data(api_request.user_request.source,
-                         api_request.user_request.fields,
-                         output_data)
+                          api_request.user_request.fields,
+                          output_data)
 
     api_request.status = 'saved'
 

@@ -1,8 +1,6 @@
-import requests
-import urllib  # ?
-import utils
-import sys     # ?
 import logging
+import requests
+import utils
 
 config = utils.get_config()
 CH_HOST = config['clickhouse']['host']

@@ -1,6 +1,7 @@
-import utils
 import logging
 import pyodbc
+import gzip
+import utils
 
 config = utils.get_config()
 VT_HOST = config['vertica']['host']
@@ -51,7 +52,15 @@ def get_data(cursor, query):
 
 def upload(cursor, table, content):
     """Uploads data to table in Vertica"""
-    pass
+    filename = 'content.tsv.gz'
+    with gzip.open('content.tsv.gz', 'w') as log:
+        log.write(bytes(content.encode(encoding='utf8')))
+    query = """COPY {table} FROM LOCAL '{file}' GZIP DELIMITER E'\t';""".format(table=table, file=filename)
+    try:
+        cursor.execute(query)
+    except Exception as e:
+        logger.critical("Unable to COPY FROM LOCAL FILE '{file}' TO TABLE {table}".format(file=filename, table=table))
+        raise e
 
 
 def get_source_table_name(source):

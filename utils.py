@@ -1,7 +1,7 @@
-import json
 import argparse
-import requests
 import re
+import json
+import requests
 
 DATE_FORMAT = '%Y-%m-%d'
 
