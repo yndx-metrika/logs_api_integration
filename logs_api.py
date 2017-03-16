@@ -129,7 +129,7 @@ def save_data(api_request, part, destination):
 
     splitted_text = r.text.split('\n')
     logger.info('### DATA SAMPLE')
-    logger.info('\n'.join(splitted_text[:5]))
+    logger.info('\n' + '\n'.join(splitted_text[:5]))
 
     headers_num = len(splitted_text[0].split('\t'))
     splitted_text_filtered = list(filter(lambda x: len(x.split('\t')) == headers_num, splitted_text))

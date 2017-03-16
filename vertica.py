@@ -112,7 +112,7 @@ def create_table(cursor, source, fields):
         ) ORDER BY {order_clause}
           SEGMENTED BY HASH({segmentation_clause}) ALL NODES;
     '''
-    field_tmpl = '{name} {type}'
+    field_tmpl = ' ' * 12 + '{name} {type}'
     field_statements = []
 
     table_name = get_source_table_name(source)
