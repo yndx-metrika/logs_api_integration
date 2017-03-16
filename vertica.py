@@ -52,14 +52,23 @@ def get_data(cursor, query):
 
 def upload(cursor: pyodbc.Cursor, table, content: bytes):
     """Uploads data to table in Vertica"""
-    filename = 'content.tsv.gz'
-    with gzip.open('content.tsv.gz', 'w') as data_dump:
+    dump_file = 'content.tsv.gz'
+    rejected_file = r'C:\Users\vvlyutin\_stash\logs_api_integration\rejected.txt'
+    exceptions_file = r'C:\Users\vvlyutin\_stash\logs_api_integration\exceptions.txt'
+    with gzip.open(dump_file, 'w') as data_dump:
         data_dump.write(content)
-    query = """COPY {table} FROM LOCAL '{file}' GZIP DELIMITER E'\t';""".format(table=table, file=filename)
+    query = """
+            COPY {table}
+            FROM LOCAL '{file}'
+            GZIP DELIMITER E'\t'
+            REJECTED DATA '{rejected}'
+            EXCEPTIONS '{exceptions}';
+        """.format(table=table, file=dump_file, rejected=rejected_file, exceptions=exceptions_file)
     try:
         cursor.execute(query)
     except Exception as e:
-        logger.critical("Unable to COPY FROM LOCAL FILE '{file}' TO TABLE {table}".format(file=filename, table=table))
+        logger.critical("Unable to COPY FROM LOCAL FILE '{file}' TO TABLE {table}"
+                        .format(file=dump_file, table=table))
         raise e
 
 
@@ -107,7 +116,7 @@ def drop_table(cursor, source):
 def create_table(cursor, source, fields):
     """Creates table in Vertica for hits/visits with particular fields"""
     tmpl = '''
-        CREATE TABLE {table_name} AS (
+        CREATE TABLE {table_name} (
             {fields}
         ) ORDER BY {order_clause}
           SEGMENTED BY HASH({segmentation_clause}) ALL NODES;
