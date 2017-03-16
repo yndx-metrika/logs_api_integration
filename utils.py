@@ -60,7 +60,7 @@ def get_counter_creation_date(counter_id, token):
 
 def get_config():
     """Returns user config"""
-    with open('./configs/config.json') as input_file:
+    with open('./configs/config_prod.json') as input_file:
         config = json.loads(input_file.read())
 
     assert 'counter_id' in config, 'CounterID must be specified in config'

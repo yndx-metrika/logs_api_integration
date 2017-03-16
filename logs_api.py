@@ -132,13 +132,14 @@ def save_data(api_request, part, destination):
     logger.info('\n'.join(splitted_text[:5]))
 
     headers_num = len(splitted_text[0].split('\t'))
-    splitted_text_filtered = filter(lambda x: len(x.split('\t')) == headers_num, splitted_text)
+    splitted_text_filtered = list(filter(lambda x: len(x.split('\t')) == headers_num, splitted_text))
     num_filtered = len(splitted_text) - len(splitted_text_filtered)
     if num_filtered != 0:
         logger.warning('%d rows were filtered out' % num_filtered)
 
-    output_data = '\n'.join(splitted_text_filtered).encode('utf-8')
-    output_data = output_data.replace(r"\'", "'")  # to correct escapes in params
+    output_data = '\n'.join(splitted_text_filtered)
+    output_data = output_data.replace(r"\'", "'")      # to correct escapes in params
+    output_data = bytes(output_data, encoding='utf8')
 
     destination.save_data(api_request.user_request.source,
                           api_request.user_request.fields,

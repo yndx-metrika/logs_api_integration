@@ -50,11 +50,11 @@ def get_data(cursor, query):
     return rows
 
 
-def upload(cursor, table, content):
+def upload(cursor: pyodbc.Cursor, table, content: bytes):
     """Uploads data to table in Vertica"""
     filename = 'content.tsv.gz'
-    with gzip.open('content.tsv.gz', 'w') as log:
-        log.write(bytes(content.encode(encoding='utf8')))
+    with gzip.open('content.tsv.gz', 'w') as data_dump:
+        data_dump.write(content)
     query = """COPY {table} FROM LOCAL '{file}' GZIP DELIMITER E'\t';""".format(table=table, file=filename)
     try:
         cursor.execute(query)
@@ -118,7 +118,7 @@ def create_table(cursor, source, fields):
     table_name = get_source_table_name(source)
 
     vt_field_types = utils.get_fields_config('vertica')
-    vt_fields = map(get_vt_field_name, fields)
+    vt_fields = list(map(get_vt_field_name, fields))
 
     order_clause = ', '.join(vt_fields[:5])
     segmentation_clause = ', '.join(vt_fields[:3])
@@ -131,6 +131,8 @@ def create_table(cursor, source, fields):
                         order_clause=order_clause,
                         segmentation_clause=segmentation_clause,
                         fields=',\n'.join(field_statements))
+
+    logger.info('CREATE table query:\n' + query)
 
     try:
         cursor.execute(query)
