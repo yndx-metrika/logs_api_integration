@@ -173,7 +173,7 @@
 	"ym:pv:screenWidth": "UInt16",
 	"ym:pv:windowClientHeight": "UInt16",
 	"ym:pv:windowClientWidth": "UInt16",
-	"ym:pv:params": "Array(String)",
+	"ym:pv:params": "String",
 	"ym:pv:lastTrafficSource": "String",
 	"ym:pv:lastSearchEngine": "String",
 	"ym:pv:lastSearchEngineRoot": "String",
