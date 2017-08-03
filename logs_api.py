@@ -1,11 +1,18 @@
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+
 import requests
-import urllib
+
 import json
 import utils
-import StringIO
 import clickhouse
 import datetime
 import logging
+
+if utils.get_python_version().startswith('2'):
+    from urllib import urlencode
+else:
+    from urllib.parse import urlencode
 
 
 logger = logging.getLogger('logs_api')
@@ -15,7 +22,7 @@ HOST = 'https://api-metrika.yandex.ru'
 
 def get_estimation(user_request):
     '''Returns estimation of Logs API (whether it's possible to load data and max period in days)'''
-    url_params = urllib.urlencode(
+    url_params = urlencode(
         [
             ('date1', user_request.start_date_str),
             ('date2', user_request.end_date_str),
@@ -82,7 +89,7 @@ def get_api_requests(user_request):
 
 def create_task(api_request):
     '''Creates a Logs API task to generate data'''
-    url_params = urllib.urlencode(
+    url_params = urlencode(
         [
             ('date1', api_request.date1_str),
             ('date2', api_request.date2_str),
@@ -153,12 +160,12 @@ def save_data(api_request, part):
     logger.info('\n'.join(splitted_text[:5]))
 
     headers_num = len(splitted_text[0].split('\t'))
-    splitted_text_filtered = filter(lambda x: len(x.split('\t')) == headers_num, r.text.split('\n'))
+    splitted_text_filtered = list(filter(lambda x: len(x.split('\t')) == headers_num, r.text.split('\n')))
     num_filtered = len(splitted_text) - len(splitted_text_filtered)
     if num_filtered != 0:
         logger.warning('%d rows were filtered out' % num_filtered)
 
-    output_data = '\n'.join(splitted_text_filtered).encode('utf-8')
+    output_data = '\n'.join(splitted_text_filtered) #.encode('utf-8')
     output_data = output_data.replace(r"\'", "'") # to correct escapes in params
 
     clickhouse.save_data(api_request.user_request.source,

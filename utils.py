@@ -1,6 +1,10 @@
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+
 import json
 import argparse
 import requests
+import platform
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -75,3 +79,5 @@ def get_ch_fields_config():
         ch_field_types = json.loads(input_file.read())
     return ch_field_types
 
+def get_python_version():
+    return platform.python_version()

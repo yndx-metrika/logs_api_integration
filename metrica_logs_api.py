@@ -84,7 +84,7 @@ def integrate_with_logs_api(config, user_request):
             for api_request in api_requests:
                 logger.info('### CREATING TASK')
                 logs_api.create_task(api_request)
-                print api_request
+                print(api_request)
 
                 delay = 20
                 while api_request.status != 'processed':
@@ -107,7 +107,7 @@ def integrate_with_logs_api(config, user_request):
                 raise e
 
 if __name__ == '__main__':
-
+    print('##### python', utils.get_python_version())
     start_time = time.time()
 
     config = utils.get_config()

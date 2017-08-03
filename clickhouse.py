@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+
 import requests
 import urllib
 import utils
@@ -30,6 +33,7 @@ def get_clickhouse_data(query, host=CH_HOST):
 
 def upload(table, content, host=CH_HOST):
     '''Uploads data to table in ClickHous'''
+    content = content.encode('utf-8')
     query_dict = {
              'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
         }
