@@ -144,9 +144,11 @@ def save_data(source, fields, data):
     '''Inserts data into ClickHouse table'''
 
     if not is_db_present():
+        logger.info('Database created')
         create_db()
 
     if not is_table_present(source):
+        logger.info('Table created')
         create_table(source, fields)
 
     upload(get_source_table_name(source), data)
