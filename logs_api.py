@@ -164,13 +164,16 @@ def save_data(api_request, part):
     num_filtered = len(splitted_text) - len(splitted_text_filtered)
     if num_filtered != 0:
         logger.warning('%d rows were filtered out' % num_filtered)
+    
+    if len(splitted_text_filtered) > 1:
+        output_data = '\n'.join(splitted_text_filtered) #.encode('utf-8')
+        output_data = output_data.replace(r"\'", "'") # to correct escapes in params
 
-    output_data = '\n'.join(splitted_text_filtered) #.encode('utf-8')
-    output_data = output_data.replace(r"\'", "'") # to correct escapes in params
-
-    clickhouse.save_data(api_request.user_request.source,
-                         api_request.user_request.fields,
-                         output_data)
+        clickhouse.save_data(api_request.user_request.source,
+                             api_request.user_request.fields,
+                             output_data)
+    else:
+        logger.warning('### No data to upload')
 
     api_request.status = 'saved'
 
