@@ -10,7 +10,7 @@
 	"ym:s:visitDuration": "UInt32",
 	"ym:s:bounce": "UInt8",
 	"ym:s:ipAddress": "String",
-	"ym:s:params": "Array(String)",
+	"ym:s:params": "String",
 	"ym:s:goalsID": "Array(UInt32)",
 	"ym:s:goalsSerialNumber": "Array(UInt32)",
 	"ym:s:goalsDateTime": "Array(DateTime)",
