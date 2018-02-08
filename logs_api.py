@@ -55,7 +55,7 @@ def get_api_requests(user_request):
             status='new'
         )
         api_requests.append(api_request)
-    else:
+    elif estimation['max_possible_day_quantity'] != 0:
         start_date = datetime.datetime.strptime(
             user_request.start_date_str,
             utils.DATE_FORMAT
@@ -83,10 +83,10 @@ def get_api_requests(user_request):
                 status='new'
             )
             api_requests.append(api_request)
-
+    else:
+        raise RuntimeError('Logs API can\'t load data: max_possible_day_quantity = 0')
     return api_requests
-
-
+  
 def create_task(api_request):
     '''Creates a Logs API task to generate data'''
     url_params = urlencode(
