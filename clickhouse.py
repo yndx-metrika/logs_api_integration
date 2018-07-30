@@ -172,6 +172,6 @@ def is_data_present(start_date_str, end_date_str, source):
                end_date=end_date_str)
 
     visits = get_clickhouse_data(query, CH_HOST)
-    is_null = (visits == '') or (visits == '0')
+    is_null = (visits == '') or (visits.strip() == '0')
     return not is null
 
