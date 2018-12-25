@@ -123,6 +123,17 @@
 	"ym:s:networkType": "String",
 	"ym:s:visitID": "UInt64",
 	"ym:s:date": "Date",
+	"ym:s:regionCountryID": "UInt32",
+	"ym:s:regionCityID": "UInt32",
+	"ym:s:lastGCLID": "String",
+	"ym:s:firstGCLID": "String",
+	"ym:s:lastSignificantGCLID": "String",
+	"ym:s:offlineCallTalkDuration": "Array(UInt32)",
+	"ym:s:offlineCallHoldDuration": "Array(UInt32)",
+	"ym:s:offlineCallMissed": "Array(UInt32)",
+	"ym:s:offlineCallTag": "Array(String)",
+	"ym:s:offlineCallFirstTimeCaller": "Array(UInt32)",
+	"ym:s:offlineCallURL": "Array(String)",
 
 	"ym:pv:watchID": "UInt64",
 	"ym:pv:counterID": "UInt32",
@@ -194,5 +205,8 @@
 	"ym:pv:shareURL": "String",
 	"ym:pv:shareTitle": "String",
 	"ym:pv:iFrame": "UInt8",
-	"ym:pv:date": "Date"
+	"ym:pv:date": "Date",
+	"ym:pv:GCLID": "String",
+	"ym:pv:regionCityID": "UInt32",
+	"ym:pv:regionCountryID": "UInt32"
 }
