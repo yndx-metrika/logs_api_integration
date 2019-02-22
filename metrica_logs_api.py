@@ -6,6 +6,7 @@ import utils
 import sys
 import datetime
 import logging
+import traceback
 
 
 def setup_logging(config):
@@ -96,13 +97,14 @@ def integrate_with_logs_api(config, user_request):
 
                 logger.info('### SAVING DATA')
                 for part in range(api_request.size):
-                    logger.info('Part #' + str(part))
+                    logger.info('Part #' + str(part).encode('utf-8'))
                     logs_api.save_data(api_request, part)
 
                 logger.info('### CLEANING DATA')
                 logs_api.clean_data(api_request)
         except Exception as e:
             logger.critical('Iteration #{i} failed'.format(i=i + 1))
+            logger.critical(e);
             if i == config['retries'] - 1:
                 raise e
 

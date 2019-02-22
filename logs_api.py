@@ -27,20 +27,21 @@ def get_estimation(user_request):
             ('date1', user_request.start_date_str),
             ('date2', user_request.end_date_str),
             ('source', user_request.source),
-            ('fields', ','.join(user_request.fields)),
-            ('oauth_token', user_request.token)
+            ('fields', ','.join(user_request.fields))
         ]
     )
+
+    headers = {'Authorization': 'OAuth ' + user_request.token}
 
     url = '{host}/management/v1/counter/{counter_id}/logrequests/evaluate?'\
         .format(host=HOST, counter_id=user_request.counter_id) + url_params
 
-    r = requests.get(url)
-    logger.debug(r.text)
+    r = requests.get(url, headers=headers)
+
     if r.status_code == 200:
         return json.loads(r.text)['log_request_evaluation']
     else:
-        raise ValueError(r.text)
+        raise ValueError(r)
 
 
 def get_api_requests(user_request):
@@ -94,16 +95,18 @@ def create_task(api_request):
             ('date1', api_request.date1_str),
             ('date2', api_request.date2_str),
             ('source', api_request.user_request.source),
-            ('fields', ','.join(sorted(api_request.user_request.fields, key=lambda s: s.lower()))),
-            ('oauth_token', api_request.user_request.token)
+            ('fields', ','.join(sorted(api_request.user_request.fields, key=lambda s: s.lower())))
         ]
     )
+
     url = '{host}/management/v1/counter/{counter_id}/logrequests?'\
         .format(host=HOST,
                 counter_id=api_request.user_request.counter_id) \
           + url_params
 
-    r = requests.post(url)
+    headers = {'Authorization': 'OAuth ' + api_request.user_request.token}
+
+    r = requests.post(url, headers=headers)
     logger.debug(r.text)
     if r.status_code == 200:
         logger.debug(json.dumps(json.loads(r.text)['log_request'], indent=2))
@@ -118,13 +121,14 @@ def create_task(api_request):
 
 def update_status(api_request):
     '''Returns current tasks\'s status'''
-    url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}?oauth_token={token}' \
+    url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}' \
         .format(request_id=api_request.request_id,
                 counter_id=api_request.user_request.counter_id,
-                token=api_request.user_request.token,
                 host=HOST)
 
-    r = requests.get(url)
+    headers = {'Authorization': 'OAuth ' + api_request.user_request.token}
+
+    r = requests.get(url, headers=headers)
     logger.debug(r.text)
     if r.status_code == 200:
         status = json.loads(r.text)['log_request']['status']
@@ -139,16 +143,17 @@ def update_status(api_request):
 
 def save_data(api_request, part):
     '''Loads data chunk from Logs API and saves to ClickHouse'''
-    url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download?oauth_token={token}' \
+    url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download' \
         .format(
             host=HOST,
             counter_id=api_request.user_request.counter_id,
             request_id=api_request.request_id,
-            part=part,
-            token=api_request.user_request.token
+            part=part
         )
 
-    r = requests.get(url)
+    headers = {'Authorization': 'OAuth ' + api_request.user_request.token}
+
+    r = requests.get(url, headers=headers)
     if r.status_code != 200:
         logger.debug(r.text)
         raise ValueError(r.text)
@@ -179,12 +184,14 @@ def save_data(api_request, part):
 
 def clean_data(api_request):
     '''Cleans generated data on server'''
-    url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/clean?oauth_token={token}' \
+    url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/clean' \
         .format(host=HOST,
                 counter_id=api_request.user_request.counter_id,
-                token=api_request.user_request.token,
                 request_id=api_request.request_id)
-    r = requests.post(url)
+
+    headers = {'Authorization': 'OAuth ' + api_request.user_request.token}
+
+    r = requests.post(url, headers=headers)
     logger.debug(r.text)
     if r.status_code != 200:
         raise ValueError(r.text)
