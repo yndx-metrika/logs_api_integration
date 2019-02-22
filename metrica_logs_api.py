@@ -6,7 +6,6 @@ import utils
 import sys
 import datetime
 import logging
-import traceback
 
 
 def setup_logging(config):
@@ -97,7 +96,7 @@ def integrate_with_logs_api(config, user_request):
 
                 logger.info('### SAVING DATA')
                 for part in range(api_request.size):
-                    logger.info('Part #' + str(part).encode('utf-8'))
+                    logger.info('Part #' + str(part))
                     logs_api.save_data(api_request, part)
 
                 logger.info('### CLEANING DATA')
