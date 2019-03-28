@@ -25,7 +25,7 @@ def get_clickhouse_data(query, host=CH_HOST):
     '''Returns ClickHouse response'''
     logger.debug(query)
     if (CH_USER == '') and (CH_PASSWORD == ''):
-        r = requests.post(host, data=query, verify=SSL_VERIFY
+        r = requests.post(host, data=query, verify=SSL_VERIFY)
     else:
         r = requests.post(host, data=query, auth=(CH_USER, CH_PASSWORD), verify=SSL_VERIFY)
     if r.status_code == 200:
