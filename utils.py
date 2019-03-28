@@ -52,10 +52,12 @@ def get_cli_options():
 def get_counter_creation_date(counter_id, token):
     '''Returns create date for counter'''
     host = 'https://api-metrika.yandex.ru'
-    url = '{host}/management/v1/counter/{counter_id}?oauth_token={token}' \
-        .format(counter_id=counter_id, token=token, host=host)
+    url = '{host}/management/v1/counter/{counter_id}' \
+        .format(counter_id=counter_id, host=host)
 
-    r = requests.get(url)
+    headers = {'Authorization': 'OAuth ' + token}
+
+    r = requests.get(url, headers=headers)
     if r.status_code == 200:
         date = json.loads(r.text)['counter']['create_time'].split('T')[0]
         return date
