@@ -15,6 +15,7 @@ CH_PASSWORD = config['clickhouse']['password']
 CH_VISITS_TABLE = config['clickhouse']['visits_table']
 CH_HITS_TABLE = config['clickhouse']['hits_table']
 CH_DATABASE = config['clickhouse']['database']
+SSL_VERIFY = (config['disable_ssl_verification_for_clickhouse'] == 0)
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -24,9 +25,9 @@ def get_clickhouse_data(query, host=CH_HOST):
     '''Returns ClickHouse response'''
     logger.debug(query)
     if (CH_USER == '') and (CH_PASSWORD == ''):
-        r = requests.post(host, data=query, verify=False)
+        r = requests.post(host, data=query, verify=SSL_VERIFY
     else:
-        r = requests.post(host, data=query, auth=(CH_USER, CH_PASSWORD), verify=False)
+        r = requests.post(host, data=query, auth=(CH_USER, CH_PASSWORD), verify=SSL_VERIFY)
     if r.status_code == 200:
         return r.text
     else:
@@ -40,10 +41,10 @@ def upload(table, content, host=CH_HOST):
              'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
         }
     if (CH_USER == '') and (CH_PASSWORD == ''):
-        r = requests.post(host, data=content, params=query_dict, verify=False)
+        r = requests.post(host, data=content, params=query_dict, verify=SSL_VERIFY)
     else:
         r = requests.post(host, data=content, params=query_dict, 
-                          auth=(CH_USER, CH_PASSWORD), verify=False)
+                          auth=(CH_USER, CH_PASSWORD), verify=SSL_VERIFY)
     result = r.text
     if r.status_code == 200:
         return result

@@ -1,6 +1,7 @@
 {
 	"token" : "<your_token>",
 	"counter_id": "<your_counter_id>",
+	"disable_ssl_verification_for_clickhouse": 0,
 	"visits_fields": [
 	    "ym:s:counterID",
 	    "ym:s:dateTime",
