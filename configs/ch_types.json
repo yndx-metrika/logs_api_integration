@@ -208,5 +208,6 @@
 	"ym:pv:date": "Date",
 	"ym:pv:GCLID": "String",
 	"ym:pv:regionCityID": "UInt32",
-	"ym:pv:regionCountryID": "UInt32"
+	"ym:pv:regionCountryID": "UInt32",
+	"ym:pv:isPageView": "UInt8"
 }
