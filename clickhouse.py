@@ -129,7 +129,7 @@ def create_table(source, fields):
             engine = 'Log'
 
     ch_field_types = utils.get_ch_fields_config()
-    ch_fields = map(get_ch_field_name, fields)
+    ch_fields = list(map(get_ch_field_name, fields))
     
     for i in range(len(fields)):
         field_statements.append(field_tmpl.format(name= ch_fields[i],
