@@ -12,7 +12,6 @@
 	"ym:s:ipAddress": "String",
 	"ym:s:params": "String",
 	"ym:s:goalsID": "Array(UInt32)",
-	"ym:s:goalsSerialNumber": "Array(UInt32)",
 	"ym:s:goalsDateTime": "Array(DateTime)",
 	"ym:s:goalsPrice": "Array(Int64)",
 	"ym:s:goalsOrder": "Array(String)",
