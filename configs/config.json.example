@@ -1,0 +1,28 @@
+{
+	"token" : "<your_token>",
+	"counter_id": "<your_counter_id>",
+	"disable_ssl_verification_for_clickhouse": 0,
+	"visits_fields": [
+	    "ym:s:counterID",
+	    "ym:s:dateTime",
+	    "ym:s:date",
+	    "ym:s:clientID"
+	],
+	"hits_fields": [
+	    "ym:pv:counterID",
+	    "ym:pv:dateTime",
+	    "ym:pv:date",
+	    "ym:pv:clientID"
+	],
+	"log_level": "INFO",
+	"retries": 1,
+	"retries_delay": 60,
+	"clickhouse": {
+		"host": "http://localhost:8123",
+		"user": "",
+		"password": "",
+		"visits_table": "visits_all",
+		"hits_table": "hits_all",
+		"database": "default"
+	}
+}
