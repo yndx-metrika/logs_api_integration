@@ -36,7 +36,6 @@ def get_clickhouse_data(query, host=CH_HOST):
 
 def upload(table, content, host=CH_HOST):
     '''Uploads data to table in ClickHous'''
-    content = content.encode('utf-8')
     insert_query = get_insert_query(table, content)
     if (CH_USER == '') and (CH_PASSWORD == ''):
         r = requests.post(host, data=insert_query, verify=SSL_VERIFY)
@@ -53,25 +52,39 @@ def upload(table, content, host=CH_HOST):
 def get_insert_query(table, content):
     '''Convert content to Insert Query'''
     insert_template_template = 'INSERT INTO {table} ({fields}) VALUES {data}'
-
     content_lines = content.split("\n")
     dimension_list = content_lines[0].split()
+    field_type_list = get_field_type_list(dimension_list)
+
     column_list = list(map(get_ch_field_name, dimension_list))
     columns = ', '.join(column_list)
     body_lines = content_lines[1:]
     rows = []
     for body_line in body_lines:
         row_values = body_line.split("\t")
-        row_values_with_quotes = list(map(surround_single_quotes, row_values))
+        row_values_with_quotes = surround_single_quotes(row_values, field_type_list)
         row = '(' + ', '.join(row_values_with_quotes) + ')'
         rows.append(row)
     data = ', '.join(rows)
 
-    return insert_template_template.format(table=table, fields=columns, data=data)
+    return insert_template_template.format(table=table, fields=columns, data=data).encode('utf-8')
 
 
-def surround_single_quotes(value):
-	return "'" + value + "'"
+def surround_single_quotes(row_values, field_type_list):
+    row_values_quoted = []
+    for row_position, row_value in enumerate(row_values):
+        field_type = field_type_list[row_position]
+        row_value_quoted = row_value if field_type.startswith('Array') else "'" + row_value + "'"
+        row_values_quoted.append(row_value_quoted)
+    return row_values_quoted
+
+
+def get_field_type_list(dimension_list):
+    field_type_list = []
+    dimension_to_field_type = utils.get_ch_fields_config()
+    for dimension in dimension_list:
+        field_type_list.append(dimension_to_field_type[dimension])
+    return field_type_list
 
 
 def get_source_table_name(source, with_db=True):

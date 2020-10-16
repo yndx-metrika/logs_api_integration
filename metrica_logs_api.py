@@ -81,6 +81,9 @@ def integrate_with_logs_api(config, user_request):
             # Creating API requests
             api_requests = logs_api.get_api_requests(user_request)
 
+            clickhouse.drop_table(clickhouse.CH_VISITS_TABLE)
+            clickhouse.drop_table(clickhouse.CH_HITS_TABLE)
+
             for api_request in api_requests:
                 logger.info('### CREATING TASK')
                 logs_api.create_task(api_request)
@@ -122,7 +125,7 @@ if __name__ == '__main__':
                                   user_request.end_date_str,
                                   user_request.source):
         logging.critical('Data for selected dates is already in database')
-        exit(0)
+        #exit(0)
 
 
     integrate_with_logs_api(config, user_request)
