@@ -2,18 +2,8 @@
 	"token" : "<your_token>",
 	"counter_id": "<your_counter_id>",
 	"disable_ssl_verification_for_clickhouse": 0,
-	"visits_fields": [
-	    "ym:s:counterID",
-	    "ym:s:dateTime",
-	    "ym:s:date",
-	    "ym:s:clientID"
-	],
-	"hits_fields": [
-	    "ym:pv:counterID",
-	    "ym:pv:dateTime",
-	    "ym:pv:date",
-	    "ym:pv:clientID"
-	],
+	"visits_fields": [<table_visits_all_field_list>],
+	"hits_fields": [<table_hits_all_field_list>],
 	"log_level": "INFO",
 	"retries": 1,
 	"retries_delay": 60,
