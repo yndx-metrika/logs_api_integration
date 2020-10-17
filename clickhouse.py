@@ -36,7 +36,15 @@ def get_clickhouse_data(query, host=CH_HOST):
 
 def upload(table, content, host=CH_HOST):
     '''Uploads data to table in ClickHous'''
+
+    #with open('content.txt', 'w') as the_file:
+    #    the_file.write(content.encode('utf8'))
+
     insert_query = get_insert_query(table, content)
+
+    #with open('insert_query.txt', 'w') as the_file:
+    #    the_file.write(insert_query)
+
     if (CH_USER == '') and (CH_PASSWORD == ''):
         r = requests.post(host, data=insert_query, verify=SSL_VERIFY)
     else:
@@ -62,7 +70,7 @@ def get_insert_query(table, content):
     rows = []
     for body_line in body_lines:
         row_values = body_line.split("\t")
-        row_values_with_quotes = surround_single_quotes(row_values, field_type_list)
+        row_values_with_quotes = prepare_row_for_insert(row_values, field_type_list)
         row = '(' + ', '.join(row_values_with_quotes) + ')'
         rows.append(row)
     data = ', '.join(rows)
@@ -70,13 +78,25 @@ def get_insert_query(table, content):
     return insert_template_template.format(table=table, fields=columns, data=data).encode('utf-8')
 
 
-def surround_single_quotes(row_values, field_type_list):
+def prepare_row_for_insert(row_values, field_type_list):
     row_values_quoted = []
     for row_position, row_value in enumerate(row_values):
         field_type = field_type_list[row_position]
-        row_value_quoted = row_value if field_type.startswith('Array') else "'" + row_value + "'"
+        row_value_quoted = row_value
+        if field_type.startswith('Array'):
+            row_value_quoted = prepare_array_for_insert(row_value)
+        else:
+            row_value_quoted = "'" + row_value + "'"
         row_values_quoted.append(row_value_quoted)
     return row_values_quoted
+
+
+def prepare_array_for_insert(string):
+    string_without_brackets = string.strip("'[]")
+    if string_without_brackets != '':
+        string_list = string_without_brackets.split("','")
+        return "[" + ",".join(list(map(repr, string_list))) + "]"
+    return string
 
 
 def get_field_type_list(dimension_list):
