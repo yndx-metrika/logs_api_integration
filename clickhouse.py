@@ -37,13 +37,13 @@ def get_clickhouse_data(query, host=CH_HOST):
 def upload(table, content, host=CH_HOST):
     '''Uploads data to table in ClickHous'''
 
-    #with open('content.txt', 'w') as the_file:
-    #    the_file.write(content.encode('utf8'))
+    # with open('content.txt', 'w') as the_file:
+    #     the_file.write(content.encode('utf8'))
 
     insert_query = get_insert_query(table, content)
 
-    #with open('insert_query.txt', 'w') as the_file:
-    #    the_file.write(insert_query)
+    # with open('insert_query.txt', 'w') as the_file:
+    #     the_file.write(insert_query)
 
     if (CH_USER == '') and (CH_PASSWORD == ''):
         r = requests.post(host, data=insert_query, verify=SSL_VERIFY)
@@ -95,7 +95,19 @@ def prepare_array_for_insert(string):
     string_without_brackets = string.strip("'[]")
     if string_without_brackets != '':
         string_list = string_without_brackets.split("','")
-        return "[" + ",".join(list(map(repr, string_list))) + "]"
+        return "[" + ",".join(list(map(prepare_array_element, string_list))) + "]"
+    return string
+
+
+def prepare_array_element(string):
+    return "'" + addslashes(string) + "'"
+
+
+def addslashes(string):
+    replace = ["\\", '"', "'", "\0", ]
+    for i in replace:
+        if i in string:
+            string = string.replace(i, '\\' + i)
     return string
 
 
