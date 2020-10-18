@@ -86,7 +86,7 @@ def prepare_row_for_insert(row_values, field_type_list):
         if field_type.startswith('Array'):
             row_value_quoted = prepare_array_for_insert(row_value)
         else:
-            row_value_quoted = "'" + row_value + "'"
+            row_value_quoted = prepare_value_for_insert(row_value)
         row_values_quoted.append(row_value_quoted)
     return row_values_quoted
 
@@ -95,11 +95,11 @@ def prepare_array_for_insert(string):
     string_without_brackets = string.strip("'[]")
     if string_without_brackets != '':
         string_list = string_without_brackets.split("','")
-        return "[" + ",".join(list(map(prepare_array_element, string_list))) + "]"
+        return "[" + ",".join(list(map(prepare_value_for_insert, string_list))) + "]"
     return string
 
 
-def prepare_array_element(string):
+def prepare_value_for_insert(string):
     return "'" + addslashes(string) + "'"
 
 
