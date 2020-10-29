@@ -134,6 +134,8 @@
 	"ym:s:offlineCallTag": "Array(String)",
 	"ym:s:offlineCallFirstTimeCaller": "Array(UInt32)",
 	"ym:s:offlineCallURL": "Array(String)",
+	"ym:s:parsedParamsKey1": "Array(String)",
+	"ym:s:parsedParamsKey2": "Array(String)",
 
 	"ym:pv:watchID": "UInt64",
 	"ym:pv:counterID": "UInt32",
