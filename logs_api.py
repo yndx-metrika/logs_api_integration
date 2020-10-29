@@ -171,7 +171,8 @@ def save_data(api_request, part):
         logger.warning('%d rows were filtered out' % num_filtered)
     
     if len(splitted_text_filtered) > 1:
-        output_data = '\n'.join(splitted_text_filtered) #.encode('utf-8')
+        output_data = '\n'.join(splitted_text_filtered[1:]) #.encode('utf-8')
+        output_date = '\t'.join(map(clickhouse.get_ch_field_name, splitted_text_filtered[0].split('\t'))) + '\n' + output_data # convert headers to CH column names
         output_data = output_data.replace(r"\'", "'") # to correct escapes in params
 
         clickhouse.save_data(api_request.user_request.source,
