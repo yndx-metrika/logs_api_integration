@@ -5,7 +5,6 @@ import requests
 
 import json
 import utils
-import clickhouse
 import datetime
 import logging
 
@@ -142,6 +141,7 @@ def update_status(api_request):
 
 
 def save_data(api_request, part):
+    import clickhouse
     '''Loads data chunk from Logs API and saves to ClickHouse'''
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download' \
         .format(
