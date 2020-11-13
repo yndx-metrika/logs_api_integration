@@ -1,3 +1,8 @@
-YES_DATE=$(date --date=' 1 days ago' '+%Y-%m-%d')
-BEFORE_YES_DATE=$(date --date=' 2 days ago' '+%Y-%m-%d')
-python metrica_logs_api.py -counter_id 68971321 -source hits -mode regular -start_date BEFORE_YES_DATE -end_date YES_DATE
+python metrica_logs_api.py -counter_id 49372510 -source hits -start_date 2018-01-01 -end_date 2018-06-30
+python metrica_logs_api.py -counter_id 49372510 -source hits -start_date 2018-07-01 -end_date 2018-12-31
+python metrica_logs_api.py -counter_id 49372510 -source hits -start_date 2019-01-01 -end_date 2019-06-30
+python metrica_logs_api.py -counter_id 49372510 -source hits -start_date 2019-07-01 -end_date 2019-12-31
+python metrica_logs_api.py -counter_id 49372510 -source hits -start_date 2020-01-01 -end_date 2020-06-30
+python metrica_logs_api.py -counter_id 49372510 -source hits -start_date 2020-07-01 -end_date 2020-11-12
+
+
