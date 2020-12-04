@@ -5,7 +5,6 @@ import requests
 
 import json
 import utils
-import clickhouse
 import datetime
 import logging
 
@@ -142,6 +141,7 @@ def update_status(api_request):
 
 
 def save_data(api_request, part):
+    import clickhouse
     '''Loads data chunk from Logs API and saves to ClickHouse'''
     url = '{host}/management/v1/counter/{counter_id}/logrequest/{request_id}/part/{part}/download' \
         .format(
@@ -172,7 +172,7 @@ def save_data(api_request, part):
     
     if len(splitted_text_filtered) > 1:
         output_data = '\n'.join(splitted_text_filtered[1:]) #.encode('utf-8')
-        output_date = '\t'.join(map(clickhouse.get_ch_field_name, splitted_text_filtered[0].split('\t'))) + '\n' + output_data # convert headers to CH column names
+        output_data = '\t'.join(map(clickhouse.get_ch_field_name, splitted_text_filtered[0].split('\t'))) + '\n' + output_data # convert headers to CH column names
         output_data = output_data.replace(r"\'", "'") # to correct escapes in params
 
         clickhouse.save_data(api_request.user_request.source,

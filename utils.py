@@ -7,6 +7,7 @@ import requests
 import platform
 
 DATE_FORMAT = '%Y-%m-%d'
+counter_id = None
 
 class Structure:
     def __init__(self, **kwds):
@@ -38,13 +39,17 @@ def validate_cli_options(options):
 
 
 def get_cli_options():
+    global counter_id
     '''Returns command line options'''
     parser = argparse.ArgumentParser()
+    parser.add_argument('-counter_id', help = 'Counter ID')
     parser.add_argument('-start_date', help = 'Start of period')
     parser.add_argument('-end_date', help = 'End of period')
     parser.add_argument('-mode', help = 'Mode (one of [history, reqular, regular_early])')
     parser.add_argument('-source', help = 'Source (hits or visits)')
     options = parser.parse_args()
+    if vars(options).get('counter_id') is not None:
+        counter_id = options.counter_id
     validate_cli_options(options)
     return options
 
@@ -63,12 +68,31 @@ def get_counter_creation_date(counter_id, token):
         return date
 
 
-def get_config():
+def get_config_by_counter(counter_id):
     '''Returns user config'''
     with open('./configs/config.json') as input_file:
-        config = json.loads(input_file.read())
+        configs = json.loads(input_file.read())
+    if not isinstance(configs, list):
+        assert True, 'configuration file is not JSON array'
+    else:
+        for config in configs:
+            if config.get('counter_id') != str(counter_id):
+                continue
+            assert 'counter_id' in config, 'CounterID must be specified in config'
+            assert 'token' in config, 'Token must be specified in config'
+            assert 'retries' in config, 'Number of retries should be specified in config'
+            assert 'retries_delay' in config, 'Delay between retries should be specified in config'
+            return config
+    assert True, 'Configurations for counter_id %s are not found' % counter_id
 
-    assert 'counter_id' in config, 'CounterID must be specified in config'
+
+def get_config():
+    '''Returns user config'''
+    global counter_id
+    if counter_id is not None:
+        return get_config_by_counter(counter_id)
+    with open('./configs/config.json') as input_file:
+        config = json.loads(input_file.read())
     assert 'token' in config, 'Token must be specified in config'
     assert 'retries' in config, 'Number of retries should be specified in config'
     assert 'retries_delay' in config, 'Delay between retries should be specified in config'
@@ -83,3 +107,6 @@ def get_ch_fields_config():
 
 def get_python_version():
     return platform.python_version()
+
+def get_counter_id():
+    return counter_id
