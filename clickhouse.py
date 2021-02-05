@@ -38,7 +38,7 @@ def upload(table, content, host=CH_HOST):
     '''Uploads data to table in ClickHous'''
     content = content.encode('utf-8')
     query_dict = {
-             'query': 'INSERT INTO ' + table + ' FORMAT TabSeparatedWithNames '
+             'query': 'INSERT INTO ' + table + ' FORMAT TabSeparated '
         }
     if (CH_USER == '') and (CH_PASSWORD == ''):
         r = requests.post(host, data=content, params=query_dict, verify=SSL_VERIFY)
