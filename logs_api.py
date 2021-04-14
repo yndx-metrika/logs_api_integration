@@ -41,7 +41,7 @@ def get_estimation(user_request):
     if r.status_code == 200:
         return json.loads(r.text)['log_request_evaluation']
     else:
-        raise ValueError(r)
+        raise ValueError(r.text)
 
 
 def get_api_requests(user_request):
