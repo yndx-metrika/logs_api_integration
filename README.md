@@ -1,9 +1,12 @@
 [Russian version](README_RU.md)
 
+# DEPRECATED
+
+This repository is not supported. Please, refer to [guide](https://cloud.yandex.com/en/docs/datalens/tutorials/data-from-metrica-yc-visualization) on integration with Yandex.Metrica Logs API supported by Yandex.Cloud
+
 # Integration with Logs API
 This script can help you to integrate Yandex.Metrica Logs API with ClickHouse.
 
-If you have any questions, feel free to write comments, create issues on GitHub or write me (e-mail: miptgirl@yandex-team.ru).
 
 ## Requirements
 Script uses Python 2.7 and also requires `requests` library. You can install this library using package manager [pip](https://pip.pypa.io/en/stable/installing/)
