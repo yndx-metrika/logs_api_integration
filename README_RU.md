@@ -1,3 +1,7 @@
+# DEPRECATED
+
+Данный репозиторий больше не поддерживается. Пожалуйста, используйте [инструкцию](https://cloud.yandex.ru/docs/datalens/tutorials/data-from-metrica-yc-visualization) по работе с Logs API Яндекс.Метрики от Yandex.Cloud.
+
 # Интеграция с Logs API
 
 Данный скрипт реализует функциональность интеграции Logs API от Яндекс.Метрики с ClickHouse.
